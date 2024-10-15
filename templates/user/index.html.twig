@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello UserController!{% endblock %}
+
+{% block body %}
+
+    <h1>Users</h1>
+
+    {% for user in users|sort((a, b) => a.email <=> b.email) %}
+        <div class="d-flex justify-content-between">
+            <p>{{ user.email }}</p>
+
+            {% if user.isActive %}
+                <span>is active</span>
+                <a href="{{ path("user_change_status", {id:user.id}) }}" class="btn btn-danger">turn OFF</a>
+            {% else %}
+                <span>is not active</span>
+
+                <a href="{{ path("user_change_status", {id:user.id}) }}" class="btn btn-success">turn ON</a>
+            {% endif %}
+        </div>
+
+        <hr>
+    {% endfor %}
+{% endblock %}
