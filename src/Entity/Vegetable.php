@@ -6,6 +6,7 @@ use App\Repository\VegetableRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VegetableRepository::class)]
 class Vegetable
@@ -13,25 +14,30 @@ class Vegetable
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["color:read", "season:read", "vegetables:read", "vegetable:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["color:read", "season:read", "vegetables:read", "vegetable:read"])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Color>
      */
     #[ORM\ManyToMany(targetEntity: Color::class, inversedBy: 'vegetables')]
+    #[Groups(["vegetable:read"])]
     private Collection $color;
 
     /**
      * @var Collection<int, Season>
      */
     #[ORM\ManyToMany(targetEntity: Season::class, inversedBy: 'vegetables')]
+    #[Groups(["vegetable:read"])]
     private Collection $season;
 
     #[ORM\ManyToOne(inversedBy: 'createdVegetables')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(["vegetable:read"])]
     private ?User $createdBy = null;
 
     public function __construct()

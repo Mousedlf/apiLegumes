@@ -3,18 +3,325 @@
 {% block title %}Hello HomeController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>Documentation</h1>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/caroline/code/B3/apiLegumes/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/home/caroline/code/B3/apiLegumes/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+    <div class="col-9">
+        {#    TOKEN #}
+        <h2>Token</h2>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-success">POST</span>
+                <span>/register</span>
+            </div>
+            <div class="card-body">
+                    <p>use : register</p>
+                    <p>body : email (string), password (string)</p>
+                    <p>response :
+                        (success :) <code>"welcome !"</code>, (error :) <code>"email taken"</code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-success">POST</span>
+                <span>/api/login</span>
+            </div>
+            <div class="card-body">
+                    <p>Log in to get a JWT token</p>
+                    <p>body : username (string), password (string)</p>
+                    response :
+                        <pre>
+                            <code>
+{
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3Mjg5MTEzMjUsImV4cCI6MTcy
+            ODk0NzMyNSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiY2Fyb2xpbmVAbWFpbC5jb20ifQ.ObWGNh
+            GZhju1Pok7deirdvet5v5fPVK5oJrleoZfHVb19RAYmS88GiMZ-qOmq5-hnuT8S0KvRHZ2LIXNxi5V5OiVh_zMxp
+            hlYOdq_xFinXRJmz_nraGCcrop9WXomQ-gHMyqohFQz5HDWdY2Fr9VfIqaRaHgC0fGe07SMgKqo2i_m02LOo1I3wkiRnj
+            VWp5YL86fLcn9N8n6jcetFttqrQdSBL-X9fa-ODDsg6rWdBlT6GmAZjKKvvMEgioO3k76cqyWwN7YtwhwDao2akkF1l0E
+            I73WhGAaWkpslxyHKYupKEsKewIsbQYdhQWnHHA147K3X2kG3Kscn0aSnXzqhg"
+}</code>
+                        </pre>
+            </div>
+        </div>
+
+        {#    VEGETABLES #}
+
+        <h2>Vegetables</h2>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-primary">GET</span>
+                <span>/api/vegetables</span>
+            </div>
+            <div class="card-body">
+                    <p>use : get all vegetables</p>
+                    <p>body : /</p>
+                <div><strong>Response :</strong></div>
+                <pre>
+[
+    {
+        "id": 1,
+        "name": "Carrot"
+    },
+    {
+        "id": 2,
+        "name": "Tomato"
+    }
+]
+</pre>
+            </div>
+        </div>
+        <div class="card" id="showVegetable">
+            <div class="card-header">
+                <span class="badge text-bg-primary">GET</span>
+                <span>/api/vegetable/{id}</span>
+            </div>
+            <div class="card-body">
+                    <p>use : get one vegetable</p>
+                    <p>body : /</p>
+                <div><strong>Response :</strong></div>
+                        <pre><code>
+{
+    "id": 8,
+    "name": "salad",
+    "color": [
+        {
+            "id": 1,
+            "name": "red"
+        },
+        {
+            "id": 3,
+            "name": "green"
+        }
+    ],
+    "season": [
+        {
+            "id": 1,
+            "name": "summer"
+        }
+    ],
+    "createdBy": {
+        "id": 3,
+        "email": "caroline@mail.com"
+    }
+}</code></pre>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-success">POST</span>
+                <span>/api/vegetable/new</span>
+            </div>
+            <div class="card-body">
+                    <p>use : add a vegetable</p>
+                    <p>body : name (string), colors (array), season (string)
+                        <code>{
+                            "name": "salad",
+                            "colors": ["red", "green"],
+                            "season": "summer"
+                            }</code></p>
+                    <p>response :
+                        <code> a vegetable object <a href="#showVegetable">(see here)</a></code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-warning">PUT</span>
+                <span>/api/vegetable/{id}/edit</span>
+            </div>
+            <div class="card-body">
+                    <p>use : edit a vegetable</p>
+                    <p>body : name (string), colors (array), season (string)</p>
+                    <p>you have to be the creator of the vegetable to edit it</p>
+                    <p>response :
+                        <code> a vegetable object <a href="#showVegetable">(see here)</a></code></p>
+
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-danger">DELETE</span>
+                <span>/api/vegetable/{id}/delete</span>
+            </div>
+            <div class="card-body">
+                    <p>use : delete a vegetable</p>
+                    <p>body : /</p>
+                    <p>you have to be the creator of the vegetable to delete it</p>
+                    <p>response :
+                        <code>"vegetable deleted successfully"</code></p>
+            </div>
+        </div>
+
+        {#    COLORS #}
+        <h2>Colors</h2>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-primary">GET</span>
+                <span>/api/colors</span>
+            </div>
+            <div class="card-body">
+                    <p>use : get all colors</p>
+                    <p>body : /</p>
+                    <p>response :
+                        <code>[
+                            {
+                            "id": 1,
+                            "name": "red"
+                            },
+                            {
+                            "id": 2,
+                            "name": "orange"
+                            },
+                            {
+                            "id": 3,
+                            "name": "white"
+                            }]</code></p>
+            </div>
+        </div>
+        <div class="card" id="showColor">
+            <div class="card-header">
+                <span class="badge text-bg-primary">GET</span>
+                <span>/api/color/{id}</span>
+            </div>
+            <div class="card-body">
+                    <p>use : get one color with associated vegetables</p>
+                    <p>body : /</p>
+                    <p>response :
+                        <code>{
+                            "id": 1,
+                            "name": "red",
+                            "vegetables": [
+                            {
+                            "id": 1,
+                            "name": "tomato"
+                            }
+                            ]
+                            }</code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-success">POST</span>
+                <span>/api/color/new</span>
+            </div>
+            <div class="card-body">
+                    <p>use : add a color</p>
+                    <p>body : name (string)</p>
+                    <p>response :
+                        <code>a color object <a href="#showColor">(see here)</a> </code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-warning">PUT</span>
+                <span>/api/color/{id}/edit</span>
+            </div>
+            <div class="card-body">
+                    <p>use : edit a color</p>
+                    <p>body : name (string)</p>
+                    <p>response :
+                        <code>a color object <a href="#showColor">(see here)</a> </code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-danger">DELETE</span>
+                <span>/api/color/{id}/delete</span>
+            </div>
+            <div class="card-body">
+                    <p>use : delete a color</p>
+                    <p>body : /</p>
+                    <p>response :
+                        <code>"color deleted successfully"</code></p>
+            </div>
+        </div>
+
+        {#    SEASONS #}
+        <h2>Seasons</h2>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-primary">GET</span>
+                <span>/api/seasons</span>
+            </div>
+            <div class="card-body">
+                    <p>use : get all seasons</p>
+                    <p>body : /</p>
+                    response :
+                        <pre><code>[
+                            {
+                            "id": 1,
+                            "name": "winter"
+                            },
+                            {
+                            "id": 2,
+                            "name": "summer"
+                            },
+                            {
+                            "id": 3,
+                            "name": "autumn"
+                            },
+                            {
+                            "id": 4,
+                            "name": "spring"
+                            }
+                            ]</code></pre>
+            </div>
+        </div>
+        <div class="card" id="showSeason">
+            <div class="card-header">
+                <span class="badge text-bg-primary">GET</span>
+                <span>/api/season/{id}</span>
+            </div>
+            <div class="card-body">
+                    <p>use : get one season with associated vegetables</p>
+                    <p>body : /</p>
+                    <p>response :
+                        <pre><code>{
+                            "id": 1,
+                            "name": "winter",
+                            "vegetables": []
+                            }</code></pre>
+                        </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-success">POST</span>
+                <span>/api/season/new</span>
+            </div>
+            <div class="card-body">
+                    <p>use : add a season</p>
+                    <p>body : name (string)</p>
+                    <p>response :
+                        <code>a season object <a href="#showSeason">(see here)</a> </code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-warning">PUT</span>
+                <span>/api/season/{id}/edit</span>
+            </div>
+            <div class="card-body">
+                    <p>use : edit a season</p>
+                    <p>body : name (string)</p>
+                    <p>response :
+                        <code>a season object <a href="#showSeason">(see here)</a> </code></p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="badge text-bg-danger">DELETE</span>
+                <span>/api/season/{id}/delete</span>
+            </div>
+            <div class="card-body">
+                    <p>use : delete a season</p>
+                    <p>body : /</p>
+                    <p>response :
+                        <code>"season deleted successfully"</code></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+
+    </div>
+
 {% endblock %}

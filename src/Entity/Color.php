@@ -14,17 +14,18 @@ class Color
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["colors:read"])]
+    #[Groups(["colors:read", "color:read", "vegetable:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["colors:read"])]
+    #[Groups(["colors:read", "color:read", "vegetable:read"])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Vegetable>
      */
     #[ORM\ManyToMany(targetEntity: Vegetable::class, mappedBy: 'color')]
+    #[Groups(["color:read"])]
     private Collection $vegetables;
 
     public function __construct()

@@ -35,13 +35,14 @@ class RegistrationController extends AbstractController
 
             // generate uuid ? juste ça ?
             $user->setUuid(Uuid::v4());
+            $user->setActive(true);
 
             $manager->persist($user);
             $manager->flush();
 
             return $this->json("welcome", 200);
         } else {
-            return $this->json("username taken", 401);
+            return $this->json("email taken", 401);
         }
 
     }

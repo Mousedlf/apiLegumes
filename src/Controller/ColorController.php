@@ -22,15 +22,45 @@ class ColorController extends AbstractController
         return $this->json($colors, 200, [], ['groups' => ['colors:read']]);
     }
 
+    #[Route('/color/{id}', methods: ['GET'])]
+    public function show(Color $color): Response
+    {
+        return $this->json($color, 200, [], ['groups' => ['color:read']]);
+    }
+
     #[Route('/color/new', methods: ['POST'])]
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $manager): Response
+    public function create(ColorRepository $colorRepository,Request $request, SerializerInterface $serializer, EntityManagerInterface $manager): Response
     {
         $json = $request->getContent();
         $color = $serializer->deserialize($json, Color::class, 'json');
 
+        $colorAlreadyInDB = $colorRepository->findOneBy(['name' => $color->getName()]);
+        if($colorAlreadyInDB) {
+            return $this->json("color already in database");
+        }
+
         $manager->persist($color);
         $manager->flush();
 
+        return $this->json($color, 200);
+    }
+
+    #[Route('/color/{id}/delete', methods: ['DELETE'])]
+    public function delete(Color $color, EntityManagerInterface $manager): Response
+    {
+        $manager->remove($color);
+        $manager->flush();
+        return $this->json("color deleted successfully", 200);
+    }
+
+    #[Route('/color/{id}/edit', methods: ['PUT'])]
+    public function edit(Color $color, Request $request, EntityManagerInterface $manager, SerializerInterface $serializer): Response
+    {
+        $editedColor = $serializer->deserialize($request->getContent(), Color::class, 'json');
+        $color->setName($editedColor->getName());
+
+        $manager->persist($color);
+        $manager->flush();
         return $this->json($color, 200);
     }
 }
