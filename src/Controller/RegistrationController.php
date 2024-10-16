@@ -16,7 +16,7 @@ use Symfony\Component\Uid\Uuid;
 
 class RegistrationController extends AbstractController
 {
-    #[Route('/register', name: 'app_register')]
+    #[Route('/register', name: 'app_register', methods: ['POST'])]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $manager,UserRepository $userRepository, SerializerInterface $serializer): Response
     {
         $json = $request->getContent();
@@ -46,4 +46,7 @@ class RegistrationController extends AbstractController
         }
 
     }
+
+
+
 }

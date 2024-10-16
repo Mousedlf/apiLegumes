@@ -3,12 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/admin')]
 class UserController extends AbstractController
 {
     #[Route('/users', name: 'app_user')]
@@ -20,7 +24,8 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/user/{id}/change/status', name: 'user_change_status')]
+
+    #[Route('/admin/user/{id}/change/status', name: 'user_change_status')]
     public function changeStatus(User $user, UserRepository $userRepository, EntityManagerInterface $manager): Response
     {
         if($user->isActive() === false){
