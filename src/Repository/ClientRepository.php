@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Client;
+use App\Entity\Platform;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,16 +20,16 @@ class ClientRepository extends ServiceEntityRepository
         /**
          * @return Client[] Returns an array of Client objects
          */
-        public function findByEmailAndPlatform($email, int $platformId): array
+        public function findByEmailAndPlatform($email, Platform $platform): Client
         {
             return $this->createQueryBuilder('c')
                 ->andWhere('c.email = :e')
-                ->andWhere('c.platformId = :pId')
+                ->andWhere('c.fromPlatform = :p')
                 ->setParameter('e', $email)
-                ->setParameter('pId', $platformId)
+                ->setParameter('p', $platform)
                 ->orderBy('c.id', 'ASC')
                 ->getQuery()
-                ->getResult()
+                ->getOneOrNullResult()
             ;
         }
 

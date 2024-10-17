@@ -28,9 +28,7 @@ class AdminKeyService
     public function getPlatformWithAdminKey(string $key):Platform
     {
         $encodedKey = base64_encode($key);
-        $platform = $this->platformRepository->findBy(['adminKey' => $encodedKey ]);
-
-        dd($platform);
+        $platform = $this->platformRepository->findOneBy(['adminKey' => $encodedKey ]);
 
         return $platform;
     }

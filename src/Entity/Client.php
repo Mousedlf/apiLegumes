@@ -13,9 +13,6 @@ class Client
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 500)]
-    private ?string $apiKey = null;
-
     #[ORM\Column]
     private ?int $nbOfAvailableRequests = null;
 
@@ -34,6 +31,9 @@ class Client
     #[ORM\ManyToOne(inversedBy: 'linkedClients')]
     private ?Platform $fromPlatform = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $apiKey = null;
+
     public function __construct(){
         $this->createdAt = new \DateTimeImmutable();
 
@@ -44,18 +44,6 @@ class Client
         return $this->id;
     }
 
-
-    public function getApiKey(): ?string
-    {
-        return $this->apiKey;
-    }
-
-    public function setApiKey(string $apiKey): static
-    {
-        $this->apiKey = $apiKey;
-
-        return $this;
-    }
 
     public function getNbOfAvailableRequests(): ?int
     {
@@ -125,6 +113,18 @@ class Client
     public function setFromPlatform(?Platform $fromPlatform): static
     {
         $this->fromPlatform = $fromPlatform;
+
+        return $this;
+    }
+
+    public function getApiKey(): ?string
+    {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?string $apiKey): static
+    {
+        $this->apiKey = $apiKey;
 
         return $this;
     }

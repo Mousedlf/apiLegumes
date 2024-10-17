@@ -26,9 +26,7 @@ class PlatformController extends AbstractController
     ): Response
     {
         $json = $request->getContent();
-
         $platform = $serializer->deserialize($json, Platform::class, 'json');
-
         $adminKey = $platform->getAdminKey();
 
         $email = (new Email())
@@ -37,7 +35,6 @@ class PlatformController extends AbstractController
             ->subject('Generated platform api key')
             ->text($adminKey);
 /*            ->html('<p>a key</p>');*/
-
         $mailer->send($email);
 
         $encodedAdminKey = base64_encode($adminKey);
@@ -50,7 +47,7 @@ class PlatformController extends AbstractController
     }
 
     #[Route('/client/new', name: 'new_client', methods: ['POST'])]
-    public function newClient(Request $request,
+    public function newClientWithKeyCreation(Request $request,
                               SerializerInterface $serializer,
                               EntityManagerInterface $manager,
                               AdminKeyService $adminKeyService): Response
@@ -60,60 +57,144 @@ class PlatformController extends AbstractController
 
         $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
 
-        if($hasAccess){
-            $client = $serializer->deserialize($json, Client::class, 'json');
-
-            $faker = \Faker\Factory::create();
-            $apiKey = substr(str_shuffle(str_repeat($faker->lexify('??????') . $faker->numerify('###'), 10)), 0, 20);
-
-            $client->setNbUsedRequests(0);
-            $client->setFromPlatform($adminKeyService->getPlatformWithAdminKey($apiKey));
-
-            $hashedAPIKey = hash('sha256', $apiKey);
-            $client->setApiKey($hashedAPIKey);
-            $client->setActive(true);
-
-            $manager->persist($client);
-            $manager->flush();
-
-            $response =  [
-                "email"=>$client->getEmail(),
-                "apiKey"=>$apiKey
-            ];
-
-            return $this->json($response);
+        if(!$hasAccess){
+            return $this->json("your admin key does not give you access to this api");
         }
-        return $this->json("your admin key does not give you access to this api");
 
+        $client = $serializer->deserialize($json, Client::class, 'json');
 
+        $faker = \Faker\Factory::create();
+        $apiKey = substr(str_shuffle(str_repeat($faker->lexify('??????') . $faker->numerify('###'), 10)), 0, 20);
+
+        $client->setNbUsedRequests(0);
+        $client->setFromPlatform($adminKeyService->getPlatformWithAdminKey($body["adminKey"]));
+
+        $hashedAPIKey = hash('sha256', $apiKey);
+        $client->setApiKey($hashedAPIKey);
+        $client->setActive(true);
+
+        $manager->persist($client);
+        $manager->flush();
+
+        $response =  [
+            "email"=>$client->getEmail(),
+            "apiKey"=>$apiKey
+        ];
+
+        return $this->json($response);
     }
 
-    #[Route('/client/used/requests', name: 'get_nb_', methods: ['POST'])]
-    public function getNumberOfUsedRequests(
+    #[Route('/client/requests', name: 'get_client_request_info', methods: ['POST'])]
+    public function getClientRequestInfo(
         Request $request,
         AdminKeyService $adminKeyService,
         ClientRepository $clientRepository,
     ): Response
     {
         $json = $request->getContent();
-        $body = json_decode($json, true);
+        $body = json_decode($json, true);  //email,adminKey
 
         $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
 
-        if ($hasAccess === true) {
-
-            $platformId = $adminKeyService->getIdOfPlatformWithAdminKey($body["apiKey"]);
-
-            $clientRepository->findByEmailAndPlatform($body["email"], $platformId);
-
-            $response = [
-                "nbUsedRequests" => "",
-                "nbOfAvailableRequests" => ""
-            ];
-            return $this->json($response);
+        if(!$hasAccess) {
+            return $this->json("your admin key does not give you access to this api");
         }
 
+        $platform =$adminKeyService->getPlatformWithAdminKey($body["adminKey"]);
+        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $platform);
 
+        $response = [
+            "nbUsedRequests" => $requestedClient[0]->getNbUsedRequests(),
+            "nbOfAvailableRequests" => $requestedClient[0]->getNbOfAvailableRequests() // a changer [0]
+        ];
+
+        return $this->json($response);
+    }
+
+    #[Route('/revoke/key', name: 'revoke_key', methods: ['POST'])]
+    public function revokeKey(
+        Request $request,
+        AdminKeyService $adminKeyService,
+        ClientRepository $clientRepository,
+        EntityManagerInterface $manager,
+    ): Response
+    {
+        $json = $request->getContent();
+        $body = json_decode($json, true);  //email,adminKey,destroy(bool)
+
+        $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
+
+        if(!$hasAccess) {
+            return $this->json("your admin key does not give you access to this api");
+        }
+
+        $platform =$adminKeyService->getPlatformWithAdminKey($body["adminKey"]);
+        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $platform);
+
+        if(!$requestedClient){
+            return $this->json("the email does not match to an existing client");
+        }
+
+        if($body["destroy"]){
+            $requestedClient->setApiKey(null);
+            $requestedClient->setActive(false);
+        } else {
+            $faker = \Faker\Factory::create();
+            $newApiKey = substr(str_shuffle(str_repeat($faker->lexify('??????') . $faker->numerify('###'), 10)), 0, 20);
+            $hashedAPIKey = hash('sha256', $newApiKey);
+            $requestedClient->setApiKey($hashedAPIKey);
+
+            $manager->persist($requestedClient);
+            $manager->flush();
+
+            $response =  [
+                "email"=>$requestedClient->getEmail(),
+                "apiKey"=>$newApiKey
+            ];
+
+            return $this->json($response);
+        }
+        return $this->json("key revoked");
+    }
+
+    #[Route('/add/requests', name: 'add_requests', methods: ['POST'])]
+    public function addRequests(
+        Request $request,
+        AdminKeyService $adminKeyService,
+        EntityManagerInterface $manager,
+        ClientRepository $clientRepository,
+    )
+    {
+        $json = $request->getContent();
+        $body = json_decode($json, true); //email,adminKey
+
+        $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
+        if(!$hasAccess) {
+            return $this->json("your admin key does not give you access to this api");
+        }
+
+        $platform =$adminKeyService->getPlatformWithAdminKey($body["adminKey"]);
+        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $platform);
+
+        if(!$requestedClient){
+            return $this->json("the email does not match to an existing client");
+        }
+
+        $requestedClient->setNbOfAvailableRequests($requestedClient->getNbOfAvailableRequests()+$body["nbRequest"]);
+
+        $manager->persist($requestedClient);
+        $manager->flush();
+
+        $response = [
+            "nbUsedRequests" => $requestedClient->getNbUsedRequests(),
+            "nbOfAvailableRequests" => $requestedClient->getNbOfAvailableRequests(),
+            "nbRemainingRequests" =>$requestedClient->getNbOfAvailableRequests() - $requestedClient->getNbUsedRequests()
+        ];
+
+        return $this->json($response);
 
     }
+
+
+
 }
