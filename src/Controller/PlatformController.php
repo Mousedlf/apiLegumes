@@ -81,7 +81,7 @@ class PlatformController extends AbstractController
             "apiKey"=>$apiKey
         ];
 
-        return $this->json($response);
+        return $this->json($response, 201);
     }
 
     #[Route('/client/requests', name: 'get_client_request_info', methods: ['POST'])]
@@ -135,7 +135,7 @@ class PlatformController extends AbstractController
             return $this->json("the email does not match to an existing client");
         }
 
-        if($body["destroy"]){
+        if($body["mustBeRemoved"]){
             $requestedClient->setApiKey(null);
             $requestedClient->setActive(false);
         } else {
