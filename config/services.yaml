@@ -22,3 +22,15 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Register your KeyService
+    App\Service\KeyService:
+        arguments:
+            $clientRepository: '@App\Repository\ClientRepository'
+
+    # Register your ApiKeyListener and tag it as an event listener for kernel.request
+    App\EventListener\ApiKeyListener:
+        arguments:
+            $keyService: '@App\Service\KeyService'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
