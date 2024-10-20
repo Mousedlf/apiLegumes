@@ -22,7 +22,6 @@ class AdminKeyService
             return false;
         }
         return true;
-
     }
 
     public function getPlatformWithAdminKey(string $key):Platform
@@ -31,5 +30,25 @@ class AdminKeyService
         $platform = $this->platformRepository->findOneBy(['adminKey' => $encodedKey ]);
 
         return $platform;
+    }
+
+    public function hasPlatformAccess(string $key):array
+    {
+        $hasAccess = $this->checkAdminKey($key);
+
+        if($hasAccess){
+            $platform = $this->getPlatformWithAdminKey($key);
+
+            $response = [
+                'success' => true,
+                'platform' => $platform,
+            ];
+            return $response;
+        } else {
+            $response = [
+                'success' => false
+            ];
+            return $response;
+        }
     }
 }

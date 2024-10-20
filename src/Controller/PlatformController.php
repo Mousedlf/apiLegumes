@@ -55,7 +55,8 @@ class PlatformController extends AbstractController
         $json = $request->getContent();
         $body = json_decode($json, true);
 
-        $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
+
+        $hasAccess = $adminKeyService->hasPlatformAccess($body["adminKey"]);
 
         if(!$hasAccess){
             return $this->json("your admin key does not give you access to this api");
@@ -94,7 +95,7 @@ class PlatformController extends AbstractController
         $json = $request->getContent();
         $body = json_decode($json, true);  //email,adminKey
 
-        $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
+        $hasAccess = $adminKeyService->hasPlatformAccess($body["adminKey"]);
 
         if(!$hasAccess) {
             return $this->json("your admin key does not give you access to this api");
@@ -104,8 +105,9 @@ class PlatformController extends AbstractController
         $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $platform);
 
         $response = [
-            "nbUsedRequests" => $requestedClient[0]->getNbUsedRequests(),
-            "nbOfAvailableRequests" => $requestedClient[0]->getNbOfAvailableRequests() // a changer [0]
+            "nbUsedRequests" => $requestedClient->getNbUsedRequests(),
+            "nbOfAvailableRequests" => $requestedClient->getNbOfAvailableRequests(),
+            "remainingRequests" =>$requestedClient->getNbOfAvailableRequests() - $requestedClient->getNbUsedRequests()
         ];
 
         return $this->json($response);
@@ -122,15 +124,13 @@ class PlatformController extends AbstractController
         $json = $request->getContent();
         $body = json_decode($json, true);  //email,adminKey,destroy(bool)
 
-        $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
+        $hasAccess = $adminKeyService->hasPlatformAccess($body["adminKey"]);
 
         if(!$hasAccess) {
             return $this->json("your admin key does not give you access to this api");
         }
 
-        $platform =$adminKeyService->getPlatformWithAdminKey($body["adminKey"]);
-        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $platform);
-
+        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $hasAccess["platform"]);
         if(!$requestedClient){
             return $this->json("the email does not match to an existing client");
         }
@@ -168,14 +168,13 @@ class PlatformController extends AbstractController
         $json = $request->getContent();
         $body = json_decode($json, true); //email,adminKey
 
-        $hasAccess = $adminKeyService->checkAdminKey($body["adminKey"]);
+        $hasAccess = $adminKeyService->hasPlatformAccess($body["adminKey"]);
+
         if(!$hasAccess) {
             return $this->json("your admin key does not give you access to this api");
         }
 
-        $platform =$adminKeyService->getPlatformWithAdminKey($body["adminKey"]);
-        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $platform);
-
+        $requestedClient= $clientRepository->findByEmailAndPlatform($body["email"], $hasAccess['platform']);
         if(!$requestedClient){
             return $this->json("the email does not match to an existing client");
         }
@@ -188,7 +187,7 @@ class PlatformController extends AbstractController
         $response = [
             "nbUsedRequests" => $requestedClient->getNbUsedRequests(),
             "nbOfAvailableRequests" => $requestedClient->getNbOfAvailableRequests(),
-            "nbRemainingRequests" =>$requestedClient->getNbOfAvailableRequests() - $requestedClient->getNbUsedRequests()
+            "remainingRequests" =>$requestedClient->getNbOfAvailableRequests() - $requestedClient->getNbUsedRequests()
         ];
 
         return $this->json($response);
